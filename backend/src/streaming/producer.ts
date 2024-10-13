@@ -21,13 +21,13 @@ export const startProducing = async () => {
 
   eventSource.onmessage = async (event) => {
     const recentChange = JSON.parse(event.data);
-    console.log('Sending recent change to Kafka:', recentChange);
+    console.log('Sending recent change to Kafka:', recentChange['timestamp']);
 
     // Produce the message to Kafka
     await producer.send({
       topic: 'recent-changes',  // Kafka topic to send messages to
       messages: [
-        { value: JSON.stringify(recentChange) },
+        { value: JSON.stringify({'timestamp':recentChange['timestamp']}) },
       ],
     });
   };
@@ -36,3 +36,6 @@ export const startProducing = async () => {
     console.error('Error in Wikimedia stream:', error);
   };
 };
+
+// Start producing Wikimedia stream messages
+startProducing().catch(console.error);

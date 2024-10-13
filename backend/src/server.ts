@@ -14,8 +14,11 @@ import hotelRoutes from "./routes/hotels";
 import bookingRoutes from "./routes/my-bookings";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import WebSocket from 'ws';
+
 
 import { startProducing } from './streaming/producer';
+import { startConsuming } from "./streaming/consumer";
 
 
 // cloudinary.config({
@@ -91,6 +94,23 @@ app.get("/stream", (req: Request, res: Response) => {
   });
 });
 
-app.listen(7000, () => {
+// Create a WebSocket server
+const wss = new WebSocket.Server({ noServer: true });
+
+// Handle WebSocket connections
+wss.on('connection', (ws) => {
+    console.log('Client connected to WebSocket');
+    
+    // Start consuming messages from Kafka and send to WebSocket client
+    startConsuming(ws);
+});
+
+const server = app.listen(7000, () => {
   console.log("server running on localhost:7000");
+});
+
+server.on('upgrade', (request, socket, head) => {
+  wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+  });
 });
