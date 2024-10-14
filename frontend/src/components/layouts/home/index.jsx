@@ -32,7 +32,8 @@ export default function HomeLayout() {
         };
 
         socket.onmessage = (event) => {
-            const newData = JSON.parse(event.data);
+            // const newData = JSON.parse(event.data);
+            const newData = event.data;
             setStreamData((prevData) => [...prevData, newData]);
         };
 
@@ -54,7 +55,7 @@ export default function HomeLayout() {
             <h1>Recent Wikipedia Changes</h1>
             <ul>
                 {streamData.map((data, index) => (
-                    <li key={index}>{data.timestamp || "No comment available"}</li>
+                    <li key={index}>{data || "No comment available"}</li>
                 ))}
             </ul>
         </div>

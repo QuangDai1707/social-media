@@ -17,11 +17,13 @@ export const startConsuming = async (ws: WebSocket) => {
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
             const content = message.value?.toString();
-            console.log('Sending message to WebSocket:', content);
+            
+            if(content)
+                console.log('Sending message to WebSocket:', (new Date(JSON.parse(content)['timestamp'])).toString());
             
             // Forward the message to WebSocket clients
             if (content && ws.readyState === WebSocket.OPEN) {
-                ws.send(content);
+                ws.send(new Date(parseInt(JSON.parse(content)['timestamp'])*1000).toString());
             }
         },
     });
